@@ -8,7 +8,14 @@
 import Combine
 import LocalAuthentication
 
+enum AuthStatus: String {
+    case succeed = "Success"
+    case failed = "Failed"
+    case waiting = "Waiting"
+}
+
 class AuthRepository: ObservableObject {
+    @Published var authStatus: AuthStatus = .waiting
     @Published var results: [String] = []
     @Published var showDialog = false
     @Published var dialogMessage = ""
@@ -26,6 +33,9 @@ class AuthRepository: ObservableObject {
         if context.canEvaluatePolicy(policy, error: &error) {
             execute(context: &context, policy: policy)
         } else {
+            DispatchQueue.main.async {
+                self.authStatus = .failed
+            }
             showDialog(title: error?.localizedDescription ?? "LAContext.canEvaluatePolicy(_ policy: LAPolicy, error: NSErrorPointer) returned false")
         }
     }
@@ -37,6 +47,7 @@ class AuthRepository: ObservableObject {
         context.evaluatePolicy(policy, localizedReason: "Reason For FaceID") { (success, error) in
             if success {
                 DispatchQueue.main.async {
+                    self.authStatus = .succeed
                     self.results.append("Success")
                 }
                 return
@@ -47,6 +58,7 @@ class AuthRepository: ObservableObject {
                 self.reasonFromErrorCode(error, &reason)
                 
                 DispatchQueue.main.async {
+                    self.authStatus = .failed
                     self.results.append(reason)
                     if error.code == .userFallback {
                         self.dialogMessage = "LAError.code == .userFallback"
@@ -59,6 +71,7 @@ class AuthRepository: ObservableObject {
     }
     
     func clearHistory() {
+        self.authStatus = .waiting
         self.results.removeAll()
     }
 }

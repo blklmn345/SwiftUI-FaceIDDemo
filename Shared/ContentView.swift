@@ -18,6 +18,10 @@ struct ContentView: View {
         NavigationView {
             ScrollViewReader { reader in
                 List {
+                    Section(header: Text("Status")) {
+                        Text(repository.authStatus.rawValue)
+                    }
+                    
                     Section(header: Text("Configuration")) {
                         Toggle(isOn: $fallbackWithPasscode, label: {
                             Text("Fallback with passcode when failed few times")
