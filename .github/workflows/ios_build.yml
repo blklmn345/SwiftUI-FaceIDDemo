@@ -21,9 +21,11 @@ jobs:
     runs-on: macos-latest
     
     steps:
+      - name: Check Macos version
+        run: sw_vers -productVersion
       - uses: actions/checkout@v2
       - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_12.5.1.app/Contents/Developer
+        run: sudo xcode-select -s /Applications/Xcode_12.4.app/Contents/Developer
       - name: Show Xcode version
         run: xcodebuild -version
       - name: Build
